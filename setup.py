@@ -1,5 +1,5 @@
 from setuptools import setup
-from ilabs.client import __version__, __description__, __url__, __author__, \
+from ilabs.matchback import __version__, __description__, __url__, __author__, \
     __author_email__, __keywords__
 
 NAME = 'ilabs.matchback'

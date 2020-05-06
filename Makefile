@@ -12,6 +12,7 @@ test:
 wheel: test
 	rm -rf wheelhouse
 	mkdir wheelhouse
+	pip install wheel
 	pip wheel -v --wheel-dir=wheelhouse .
 
 publish: wheel
