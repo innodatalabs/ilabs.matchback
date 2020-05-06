@@ -116,28 +116,9 @@ def build_index(xml):
     yield from process(xml, 0)
 
 
-def split_on_punct(text):
-    off = 0
-    for mtc in re.finditer(r'[\.,!\?:;_\'"-=@]', text):
-        yield text[off:mtc.end()]
-        off = mtc.end()
-    if off < len(text):
-        yield text[off:]
-
-
-def split_text(text):
-    off = 0
-    for mtc in re.finditer(r'[A-Zae]+', text):
-        if mtc.start() > off:
-            yield text[off:mtc.start()]
-        off = mtc.start()
-    if off < len(text):
-        yield text[off:]
-
 def segment(text):
-    text = re.sub(r'\s+', '', text)
-    for chunk in split_on_punct(text):
-        yield from split_text(chunk)
+    '''Simplest possible segmentation: words'''
+    return text.split()
 
 
 def find_idref(match_index, html_index, xml_index, id_, required_coverage=0.75):
