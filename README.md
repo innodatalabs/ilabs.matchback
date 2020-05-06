@@ -1,4 +1,7 @@
 # ilabs.matchbak
+[![Build Status](https://travis-ci.com/innodatalabs/ilabs.matchback.svg?branch=master)](https://travis-ci.com/innodatalabs/ilabs.matchback)
+[![PyPI version](https://badge.fury.io/py/ilabs.matchback.svg)](https://badge.fury.io/py/ilabs.matchback)
+
 
 A tool to match back XML elements of the Innodata's inno:dom XML to the source HTML elements.
 
