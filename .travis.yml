@@ -7,9 +7,6 @@ branches:
     only:
     - master
 
-services:
-    - docker
-
 script:
-    - make maybe_publish  # test, build wheel, and (if on tag) publish
+    - PYTHONPATH=. make maybe_publish  # test, build wheel, and (if on tag) publish
 
