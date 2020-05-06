@@ -17,10 +17,10 @@ wheel: test
 
 publish: wheel
 	pip install twine
-	twine upload wheelhouse/*.whl -u __token__ -p $(PYPI_TOKEN)
+	twine upload wheelhouse/ilabs.matchback*.whl -u __token__ -p $(PYPI_TOKEN)
 
 maybe_publish: wheel
 ifneq ($(ON_TAG),)
 	pip install twine
-	twine upload wheelhouse/*.whl -u __token__ -p $(PYPI_TOKEN)
+	twine upload wheelhouse/ilabs.matchback*.whl -u __token__ -p $(PYPI_TOKEN)
 endif
