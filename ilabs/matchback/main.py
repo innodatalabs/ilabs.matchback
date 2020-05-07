@@ -15,15 +15,10 @@ inno = lambda x: f'{{{NS}}}{x}'
 IndexedItem = collections.namedtuple('IndexedItem', ['text', 'elt', 'level', 'type'])
 
 
-def matchback(html_name, xml_name, output_html, output_meta, required_coverage=0.75):
+def matchback(html, xml, required_coverage=0.75):
 
     if required_coverage <= 0.:
         raise ValueError('Required coverage can not be zero or negative')
-
-    html = ht.parse(html_name)
-
-    with open(xml_name, 'rb') as f:
-        xml = et.fromstring(f.read())
 
     if xml.tag != inno('dom'):
         raise RuntimeError('XML document is not an InnoDOM one (top level tag should be "dom")!')
@@ -36,7 +31,7 @@ def matchback(html_name, xml_name, output_html, output_meta, required_coverage=0
     if meta is None:
         raise RuntimeError('XML document problem: "meta" not found')
 
-    html_index = list(build_index(html.getroot()))
+    html_index = list(build_index(html))
     xml_index = list(build_index(content))
 
     html_text = [x.text for x in html_index]
@@ -90,30 +85,26 @@ def matchback(html_name, xml_name, output_html, output_meta, required_coverage=0
 
         meta_json.append(obj)
 
-    html.write(output_html)
-    logging.info('Saved HTML as %s', output_html)
-
-    with open(output_meta, 'w') as f:
-        json.dump(meta_json, f, indent='\t')
-    logging.info('Saved META as %s', output_meta)
+    return meta_json
 
 
 def build_index(xml):
     '''Given an XML tree, extracts text and builds an index from text offset back to the closest XML element'''
 
-    def process(elt, level):
+    def process(elt, level, parent):
         if elt.text and elt.text.strip():
             for chunk in segment(elt.text.strip()):
                 yield IndexedItem(chunk, elt, level, 'text')
 
         for c in elt:
-            yield from process(c, level+1)
+            yield from process(c, level+1, elt)
 
-        if elt.tail and elt.tail.strip():
-            for chunk in segment(elt.tail.strip()):
-                yield IndexedItem(chunk, elt, level, 'tail')
+        if parent is not None:
+            if elt.tail and elt.tail.strip():
+                for chunk in segment(elt.tail.strip()):
+                    yield IndexedItem(chunk, parent, level, 'tail')
 
-    yield from process(xml, 0)
+    yield from process(xml, 0, None)
 
 
 def segment(text):
@@ -193,7 +184,19 @@ def main():
 
     logging.basicConfig(level=logging.DEBUG if args.verbose else logging.INFO)
 
-    matchback(args.input_html, args.input_innodom, args.output_html, args.output_meta, required_coverage=args.required)
+    html = ht.parse(args.input_html)
+
+    with open(args.input_innodom, 'rb') as f:
+        xml = et.fromstring(f.read())
+
+    meta_json = matchback(html.getroot(), xml, required_coverage=args.required)
+
+    html.write(args.output_html)
+    logging.info('Saved HTML as %s', args.output_html)
+
+    with open(args.output_meta, 'w') as f:
+        json.dump(meta_json, f, indent='\t')
+    logging.info('Saved META as %s', args.output_meta)
 
 
 if __name__ == '__main__':
