@@ -39,7 +39,8 @@ You need to provide two input files:
 
 Tool will generate two output files:
 * Instrumented HTML - this is the input HTML file with added id attributes (where needed), to be referenced by meta datapoint via idref
-* meta JSON file - the inno:meta section extracted from the inno:dom XML file, where "idref" atributes now point to the HTML
+* meta JSON file - the inno:meta section extracted from the inno:dom XML file, where "idref" atributes now point to the HTML. Additionally,
+  each datapoint there receives an `xpath` attribute, pointing to the support element in the source HTML.
 
 ## Algorithm
 

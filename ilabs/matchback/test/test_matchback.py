@@ -21,6 +21,7 @@ def test_matchback():
 
     assert len(meta) == 1
     assert meta[0]['idref'] == 'para1'
+    assert meta[0]['xpath'] == '/body/p'
 
 
 def test_matchback01():
@@ -46,3 +47,4 @@ def test_matchback01():
 </body>\
 '''
     assert meta[0]['idref'] == 'para1'
+    assert meta[0]['xpath'] == '/body/p'

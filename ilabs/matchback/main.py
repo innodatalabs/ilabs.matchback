@@ -77,8 +77,16 @@ def matchback(html, xml, required_coverage=0.75):
         }
         idref = datapoint.get('idref')
         if idref is not None:
-            srcid = find_idref(match_index, html_index, xml_index, idref, required_coverage=required_coverage)
+            elt = find_idref(match_index, html_index, xml_index, idref, required_coverage=required_coverage)
+            srcid = elt.get('id')
+            if srcid is None:
+                srcid = str(uuid.uuid4())
+                logging.debug('Created an id for element %s: %s', elt.tag, srcid)
+                elt.set('id', srcid)
+
+            logging.debug('Found a match %s => %s', idref, srcid)
             obj['idref'] = srcid
+            obj['xpath'] = html.getroottree().getpath(elt)
 
         if datapoint.get('confidence'):
             obj['confidence'] = round(float(datapoint.get('confidence')), 3)
@@ -149,15 +157,7 @@ def find_idref(match_index, html_index, xml_index, id_, required_coverage=0.75):
     assert len(srcset) == 1
     _, (elt, level) = srcset.popitem()
 
-    srcid = elt.get('id')
-    if srcid is None:
-        srcid = str(uuid.uuid4())
-        logging.debug('Created an id for element %s: %s', elt.tag, srcid)
-        elt.set('id', srcid)
-
-    logging.debug('Found a match %s => %s', id_, srcid)
-
-    return srcid
+    return elt
 
 
 def xml_offsets(xml_index, id_):
