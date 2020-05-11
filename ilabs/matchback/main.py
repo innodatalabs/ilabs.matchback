@@ -31,7 +31,8 @@ def matchback(html, xml, required_coverage=0.75):
     if meta is None:
         raise RuntimeError('XML document problem: "meta" not found')
 
-    html_index = list(build_index(html))
+    html_parmap = {}
+    html_index = list(build_index(html, parmap=html_parmap))
     xml_index = list(build_index(content))
 
     html_text = [x.text for x in html_index]
@@ -77,7 +78,7 @@ def matchback(html, xml, required_coverage=0.75):
         }
         idref = datapoint.get('idref')
         if idref is not None:
-            elt = find_idref(match_index, html_index, xml_index, idref, required_coverage=required_coverage)
+            elt = find_idref(match_index, html_index, html_parmap, xml_index, idref, required_coverage=required_coverage)
             srcid = elt.get('id')
             if srcid is None:
                 srcid = str(uuid.uuid4())
@@ -96,10 +97,12 @@ def matchback(html, xml, required_coverage=0.75):
     return meta_json
 
 
-def build_index(xml):
+def build_index(xml, parmap=None):
     '''Given an XML tree, extracts text and builds an index from text offset back to the closest XML element'''
 
     def process(elt, level, parent):
+        if parmap is not None:
+            parmap[id(elt)] = parent
         if elt.text and elt.text.strip():
             for chunk in segment(elt.text.strip()):
                 yield IndexedItem(chunk, elt, level, 'text')
@@ -110,7 +113,7 @@ def build_index(xml):
         if parent is not None:
             if elt.tail and elt.tail.strip():
                 for chunk in segment(elt.tail.strip()):
-                    yield IndexedItem(chunk, parent, level, 'tail')
+                    yield IndexedItem(chunk, parent, level-1, 'tail')
 
     yield from process(xml, 0, None)
 
@@ -120,7 +123,7 @@ def segment(text):
     return text.split()
 
 
-def find_idref(match_index, html_index, xml_index, id_, required_coverage=0.75):
+def find_idref(match_index, html_index, html_parmap, xml_index, id_, required_coverage=0.75):
     '''Given match index and id of an element in the InnoDom, finds matching element in the source HTML.
 
     Side effect: may create an "id" attribute on the HTML source element if needed.
@@ -136,7 +139,7 @@ def find_idref(match_index, html_index, xml_index, id_, required_coverage=0.75):
             coverage += 1
             _, i = x
             src = html_index[i]
-            srcset[id(src.elt)] = (src.elt, src.level)
+            srcset[src.elt] = (src.elt, src.level)
 
     logging.debug('Searching for %s: found %s text chunks, %s of which (%4.2lf) can be traced back to the HTML source',
         id_, len(offsets), coverage, coverage / (len(offsets) + 1.e-8))
@@ -150,9 +153,9 @@ def find_idref(match_index, html_index, xml_index, id_, required_coverage=0.75):
         topop, _ = max(srcset.items(), key=lambda x:x[1][1])
         elt, level = srcset.pop(topop)
         # move it to the parent
-        elt = elt.getparent()
+        elt = html_parmap[id(elt)]
         level -= 1
-        srcset[id(elt)] = elt, level
+        srcset[elt] = elt, level
 
     assert len(srcset) == 1
     _, (elt, level) = srcset.popitem()
@@ -191,7 +194,8 @@ def main():
 
     meta_json = matchback(html.getroot(), xml, required_coverage=args.required)
 
-    html.write(args.output_html)
+    with open(args.output_html, 'wb') as f:
+        f.write(ht.tostring(html, with_tail=False, encoding='utf-8'))
     logging.info('Saved HTML as %s', args.output_html)
 
     with open(args.output_meta, 'w') as f:
