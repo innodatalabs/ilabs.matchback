@@ -48,3 +48,29 @@ def test_matchback01():
 '''
     assert meta[0]['idref'] == 'para1'
     assert meta[0]['xpath'] == '/body/p'
+
+
+def test_matchback02():
+    html = et.fromstring(b'''<body><div><div id="div1">
+    <p><b>Hello,</b></p> <p><i>world</i>!</p>
+</div></div></body>
+''')
+    innodom = et.fromstring(b'''<dom xmlns="http://innodatalabs.com/innodom">
+<content>
+<p id="id1">Hello, world !</p>
+</content>
+<meta>
+<datapoint key="name" idref="id1">Mike</datapoint>
+</meta>
+</dom>\
+''')
+
+    meta = matchback(html, innodom)
+
+    assert len(meta) == 1
+    assert et.tostring(html) == b'''<body><div><div id="div1">
+    <p><b>Hello,</b></p> <p><i>world</i>!</p>
+</div></div></body>\
+'''
+    assert meta[0]['idref'] == 'div1'
+    assert meta[0]['xpath'] == '/body/div/div'
