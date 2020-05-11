@@ -16,9 +16,10 @@ pip install ilabs.matchback
 ```
 matchback -h
 
-usage: matchback [-h] [-v] [-r REQUIRED] input_html input_innodom output_html output_meta
+usage: main.py [-h] [-v] [-r REQUIRED]
+               input_html input_innodom output_html output_meta
 
-match HTML and InnoDOM XML files, then translate idref from InnoDOM back to the source HTML, and writes HTML and META
+match HTML and InnoDOM XML files. Version 0.1.3.
 
 positional arguments:
   input_html            HTML input file
@@ -72,8 +73,8 @@ python -m ilabs.matchback.main -h
 ## Building
 TravisCI is configured to automatically build this project.
 
-To publish new version to the PyPI, just tag the master branch and push teh tags:
+To publish new version to the PyPI, just tag the master branch and push the tags out:
 ```
-git tag 0.03
+git tag 0.1.3
 git push --tags
 ```
