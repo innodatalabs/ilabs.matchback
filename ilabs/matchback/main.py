@@ -7,6 +7,7 @@ import collections
 import uuid
 import logging
 import json
+from . import __version__
 
 
 NS = 'http://innodatalabs.com/innodom'
@@ -174,7 +175,7 @@ def xml_offsets(xml_index, id_):
 
 
 def main():
-    parser = argparse.ArgumentParser(description='match HTML and InnoDOM XML files, then translate idref from InnoDOM back to the source HTML, and writes HTML and META')
+    parser = argparse.ArgumentParser(description=f'match HTML and InnoDOM XML files. Version {__version__}.')
 
     parser.add_argument('-v', '--verbose', action='store_true', default=False, help='Increase verbosity level')
     parser.add_argument('-r', '--required', type=float, default=0.75, help='Required coverage threshold, default is %(default)s')
