@@ -102,7 +102,7 @@ def build_index(xml, parmap=None):
 
     def process(elt, level, parent):
         if parmap is not None:
-            parmap[elt] = parent
+            parmap[id(elt)] = parent
         if elt.text and elt.text.strip():
             for chunk in segment(elt.text.strip()):
                 yield IndexedItem(chunk, elt, level, 'text')
@@ -153,7 +153,7 @@ def find_idref(match_index, html_index, html_parmap, xml_index, id_, required_co
         topop, _ = max(srcset.items(), key=lambda x:x[1][1])
         elt, level = srcset.pop(topop)
         # move it to the parent
-        elt = html_parmap[elt]
+        elt = html_parmap[id(elt)]
         level -= 1
         srcset[elt] = elt, level
 
